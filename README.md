@@ -1,6 +1,6 @@
-#Actividad 8
+# Actividad 8
 ---
-##Comunicación SCI F28377S
+## Comunicación SCI F28377S
 
 1. Función para recibir frase (0x13)	Jains y Luis
 2. Lógica principal (main)				Rubén
