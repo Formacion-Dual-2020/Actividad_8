@@ -120,7 +120,7 @@ void main(void)
 {
     Uint16 ReceivedChar;
     char *msg, *msg_r;
-    int i;
+    int i=0;
 
 //
 // Step 1. Initialize System Control:
@@ -202,29 +202,16 @@ void main(void)
    {
        while(ScicRegs.SCIFFRX.bit.RXFFST == 0) { } // wait for empty state
 
-       //
-       // Get character
-       i = 0;
-           while(ScicRegs.SCIRXBUF.all != '0')
-           {
-               msg_r[i] = ScicRegs.SCIRXBUF.all;
-               i++;
-           }
-
-       //Transmit message to SCIA
-       scia_msg(msg_r);
-
-
-       //ReceivedChar = ScicRegs.SCIRXBUF.all;
-
-       /*if(ReceivedChar == 'O'){
-           msg = "L\0";
-           scic_msg(msg);
-       }*/
-
-       //scic_xmit(ReceivedChar);
-
-       //scia_xmit(ReceivedChar);
+       ReceivedChar = ScicRegs.SCIRXBUF.all;
+       if(ReceivedChar != '0'){
+           msg_r[i] = ReceivedChar;
+           i++;
+       }
+       else {
+           //Transmit message to SCIA
+           scia_msg(msg_r);
+           i = 0;
+       }
 
        LoopCount++;
    }
