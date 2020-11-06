@@ -195,22 +195,22 @@ void main(void)
    scia_fifo_init();       // Initialize the SCI FIFO
    scia_echoback_init();
 
-   msg = "Hola \0";
+   msg = "Hola 0";
    scic_msg(msg);
 
    for(;;)
    {
        while(ScicRegs.SCIFFRX.bit.RXFFST == 0) { } // wait for empty state
 
-       ReceivedChar = ScicRegs.SCIRXBUF.all;
-       if(ReceivedChar != '0'){
-           msg_r[i] = ReceivedChar;
-           i++;
+       ReceivedChar = ScicRegs.SCIRXBUF.all;    //Se guarda el caracter contenido en el buffer en ReceivedChar
+       if(ReceivedChar != '0'){                 //Si el caracter es diferente de '0'
+           msg_r[i] = ReceivedChar;             //este mismo se guarda en la posición i de msg_r
+           i++;                                 //Se utiliza una iteración para ir llenando los espacio de msg_r
        }
-       else {
+       else {                                   //Cuando el valor del caracter es '0', se deja de escribir en la cadena msg_r
            //Transmit message to SCIA
-           scia_msg(msg_r);
-           i = 0;
+           scia_msg(msg_r);                     //se escribe la palabra recibida en la consola de CCS
+           i = 0;                               //Se reinicia el contador para cuando se reciba otra palabra
        }
 
        LoopCount++;
