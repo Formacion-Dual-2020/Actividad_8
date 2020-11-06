@@ -104,6 +104,7 @@ void scic_echoback_init(void);
 void scic_fifo_init(void);
 void scic_xmit(int a);
 void scic_msg(char *msg);
+void scic_msg_r(char *msg_r);
 
 //Parte agregada
 void scia_echoback_init(void);
@@ -118,7 +119,8 @@ void scia_msg(char *msg);
 void main(void)
 {
     Uint16 ReceivedChar;
-    char *msg;
+    char *msg, *msg_r;
+    int i;
 
 //
 // Step 1. Initialize System Control:
@@ -193,34 +195,36 @@ void main(void)
    scia_fifo_init();       // Initialize the SCI FIFO
    scia_echoback_init();
 
-   msg = "H\0";
+   msg = "Hola \0";
    scic_msg(msg);
-   //msg = "\r\nYou will enter a character, and the DSP will echo it back! \n\0";
-   //scic_msg(msg);
 
    for(;;)
    {
-       //msg = "\r\nEnter a character: \0";
-       //scic_msg(msg);
-
-       //
-       // Wait for inc character
-       //
        while(ScicRegs.SCIFFRX.bit.RXFFST == 0) { } // wait for empty state
 
        //
        // Get character
-       //
-       ReceivedChar = ScicRegs.SCIRXBUF.all;
+       i = 0;
+           while(ScicRegs.SCIRXBUF.all != '0')
+           {
+               msg_r[i] = ScicRegs.SCIRXBUF.all;
+               i++;
+           }
 
-       if(ReceivedChar == 'O'){
+       //Transmit message to SCIA
+       scia_msg(msg_r);
+
+
+       //ReceivedChar = ScicRegs.SCIRXBUF.all;
+
+       /*if(ReceivedChar == 'O'){
            msg = "L\0";
            scic_msg(msg);
-       }
+       }*/
 
        //scic_xmit(ReceivedChar);
 
-       scia_xmit(ReceivedChar);
+       //scia_xmit(ReceivedChar);
 
        LoopCount++;
    }
@@ -329,7 +333,7 @@ void scia_xmit(int a)
 //
 // scia_msg - Transmit message via SCIA
 //
-/*void scia_msg(char * msg)
+void scia_msg(char * msg)
 {
     int i;
     i = 0;
@@ -338,7 +342,7 @@ void scia_xmit(int a)
         scia_xmit(msg[i]);
         i++;
     }
-}*/
+}
 
 //
 // scia_fifo_init - Initialize the SCI FIFO
