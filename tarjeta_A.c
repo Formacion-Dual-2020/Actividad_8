@@ -104,12 +104,13 @@ void scic_echoback_init(void);
 void scic_fifo_init(void);
 void scic_xmit(int a);
 void scic_msg(char *msg);
+void scic_msg_r(char *msg_r);
 
 //Parte agregada
 void scia_echoback_init(void);
 void scia_fifo_init(void);
 void scia_xmit(int a);
-//void scia_msg(char *msg);
+void scia_msg(char *msg);
 //fin de agregado
 
 //
@@ -118,7 +119,8 @@ void scia_xmit(int a);
 void main(void)
 {
     Uint16 ReceivedChar;
-    char *msg;
+    char *msg, *msg_r;
+    int i=0;
 
 //
 // Step 1. Initialize System Control:
@@ -193,34 +195,25 @@ void main(void)
    scia_fifo_init();       // Initialize the SCI FIFO
    scia_echoback_init();
 
-   msg = "H\0";
+   msg = "Hola 0";
    scic_msg(msg);
-   //msg = "\r\nYou will enter a character, and the DSP will echo it back! \n\0";
-   //scic_msg(msg);
 
    for(;;)
    {
-       //msg = "\r\nEnter a character: \0";
-       //scic_msg(msg);
-
-       //
-       // Wait for inc character
-       //
        while(ScicRegs.SCIFFRX.bit.RXFFST == 0) { } // wait for empty state
 
-       //
-       // Get character
-       //
-       ReceivedChar = ScicRegs.SCIRXBUF.all;
-
-       if(ReceivedChar == 'O'){
-           msg = "L\0";
-           scic_msg(msg);
+       //Logica para guardar la palabra recibida - ivan
+       ReceivedChar = ScicRegs.SCIRXBUF.all;    //Se guarda el caracter contenido en el buffer en ReceivedChar
+       if(ReceivedChar != '0'){                 //Si el caracter es diferente de '0'
+           msg_r[i] = ReceivedChar;             //este mismo se guarda en la posición i de msg_r
+           i++;                                 //Se utiliza una iteración para ir llenando los espacio de msg_r
        }
-
-       //scic_xmit(ReceivedChar);
-
-       scia_xmit(ReceivedChar);
+       else {                                   //Cuando el valor del caracter es '0', se deja de escribir en la cadena msg_r
+           //Transmit message to SCIA
+           scia_msg(msg_r);                     //se escribe la palabra recibida en la consola de CCS
+           i = 0;                               //Se reinicia el contador para cuando se reciba otra palabra
+       }
+       // - ivan
 
        LoopCount++;
    }
@@ -329,7 +322,7 @@ void scia_xmit(int a)
 //
 // scia_msg - Transmit message via SCIA
 //
-/*void scia_msg(char * msg)
+void scia_msg(char * msg)
 {
     int i;
     i = 0;
@@ -338,7 +331,7 @@ void scia_xmit(int a)
         scia_xmit(msg[i]);
         i++;
     }
-}*/
+}
 
 //
 // scia_fifo_init - Initialize the SCI FIFO
