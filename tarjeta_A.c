@@ -202,6 +202,7 @@ void main(void)
    {
        while(ScicRegs.SCIFFRX.bit.RXFFST == 0) { } // wait for empty state
 
+       //Logica para guardar la palabra recibida - ivan
        ReceivedChar = ScicRegs.SCIRXBUF.all;    //Se guarda el caracter contenido en el buffer en ReceivedChar
        if(ReceivedChar != '0'){                 //Si el caracter es diferente de '0'
            msg_r[i] = ReceivedChar;             //este mismo se guarda en la posición i de msg_r
@@ -212,6 +213,7 @@ void main(void)
            scia_msg(msg_r);                     //se escribe la palabra recibida en la consola de CCS
            i = 0;                               //Se reinicia el contador para cuando se reciba otra palabra
        }
+       // - ivan
 
        LoopCount++;
    }
