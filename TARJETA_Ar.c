@@ -116,9 +116,10 @@ void scia_msg(char *msg);
 //
 // Main
 //
+int iLongitud=0;
 void main(void)
 {
-    Uint16 ReceivedChar;
+    //Uint16 ReceivedChar;
     char *msg_hola,*msg_como,*msg_estas,*msg_bien,*msg_fin,*msg_r;
     int i=0;
 // Step 1. Initialize System Control:
@@ -195,25 +196,25 @@ void main(void)
 
    /*
 
-A.1 Escribe «Hola 0» al scia y al scic
+A.1 Escribe Â«Hola 0Â» al scia y al scic
 
-B.1 Recibe «Hola 0» y lo manda a scia, responde «¿cómo 0» a scia y scic
-
-
-A.2 Recibe «¿cómo 0» y lo manda a scia, responde «estás? 0» a scia y scic
-
-B.2 Recibe «estás? 0» y lo manda a scia, responde «Bien 0» a scia y scic
+B.1 Recibe Â«Hola 0Â» y lo manda a scia, responde Â«Â¿cÃ³mo 0Â» a scia y scic
 
 
-A.3 Recibe «Bien 0» y lo manda a scia.
+A.2 Recibe Â«Â¿cÃ³mo 0Â» y lo manda a scia, responde Â«estÃ¡s? 0Â» a scia y scic
+
+B.2 Recibe Â«estÃ¡s? 0Â» y lo manda a scia, responde Â«Bien 0Â» a scia y scic
+
+
+A.3 Recibe Â«Bien 0Â» y lo manda a scia.
 
 0 A.1 B.1 A.2 B.2 A.3
 .
 .
 9
 
-A.4 Envía «fin» a scia
-B.3 Envía «fin» a scia
+A.4 EnvÃ­a Â«finÂ» a scia
+B.3 EnvÃ­a Â«finÂ» a scia
     */
 
    msg_hola="Hola 0";
@@ -222,65 +223,50 @@ B.3 Envía «fin» a scia
    msg_bien="Bien. 0";
    msg_fin="Fin.";
 
-   int iTotalLetras=0, iCoincidenFLAG=0, NumMsg=0,irepeticion=0;
+   int iTotalLetras=0, iCoincidenFLAG=1, NumMsg=0,irepeticion=0;
 
    for(irepeticion=0;irepeticion<10;irepeticion++){
- //Envia el primer mensaje;
+
+       /*Lo que hace es:
+        * (1)─Hola
+        *            (2)─¿Cómo
+        * (3)─estás?
+        *            (4)─Bien.
+        *───────────────again x9;
+        * ─Fin       ─Fin.
+        * a) Envía mensaje (1).
+        * b) Espera hasta que le envíen un mensaje igual a (2).
+        * c)      Compara cada vez al recibido;
+        * d) Cuando recibe exactamente (2) lo envía por SCIA;
+        * e) Ahora envía (3);
+        * f) Espera hasta recibir un mensaje igual a (4);
+        * g)      Comprobará cadad vez al recibido;
+        * h) Cuando recibe exactamente (4) lo envía por SCIA;
+        ──────────────────Repite otra nueve veces;
+        * k) Finalmente envía Fin. por SCIA
+        */
+       //a)
        scic_msg(msg_hola); scia_msg(msg_hola);
-                                                                            //Clears received string length
- //Ahora recibe caracter por caracter, el contador de caracteres es "iTotalLetras";
-        iTotalLetras=0; iCoincidenFLAG=0;
-        while(iCoincidenFLAG){    //Dentro del bucle hasta que el mensaje sea «¿Cómo 0»
-                iCoincidenFLAG=0;
-           while(ScicRegs.SCIFFRX.bit.RXFFST == 0); ReceivedChar = ScicRegs.SCIRXBUF.all;  //Recibe cada letra;
-
-           if(ReceivedChar != '0'){ msg_r[iTotalLetras] = ReceivedChar; iTotalLetras++;}   // Y la va guardando;
-           else{
-//Terminó  de recibir la cadena y ahora la va a comparar;
-
-
-//Si las letras coinciden, "iCoincide" sigue siendo 0. Si no, será igual a 1;
-
-    for(i=0;i<iTotalLetras;i++){       if( (msg_r[i] == msg_como[i])&&(!iCoincidenFLAG) ){ }else{ iCoincidenFLAG=1; }       }
-//Terminó de comparar la cadena recibida con la que debería haber recibido;
-
-//Si coincidieron, la envía a scia y continua, pero si no, no;
-            if(!iCoincidenFLAG){ scia_msg(msg_r);}else{}                    //Hace el reenvio del primer mensaje;
-				iTotalLetras=0;
-           } //Ye se recibió el primer mensaje. Si fue «¿Cómo 0» sale del if, pero si no sale;
-       }
-
-        //Ahora debe enviar el segundo mensaje
-        scic_msg(msg_estas); scia_msg(msg_estas);
-
-//Entonces debería recibir el mensaje «Bien 0», y se quedará en el sigueinte bucle hasta que eso sea;
-       while(iCoincidenFLAG){            iCoincidenFLAG=0;
-
-       while(ScicRegs.SCIFFRX.bit.RXFFST == 0); ReceivedChar = ScicRegs.SCIRXBUF.all;  //Recibe cada letra;
-
-       if(ReceivedChar != '0'){ msg_r[iTotalLetras] = ReceivedChar; iTotalLetras++;}   // Y la va guardando;
-       else{
-//Terminó de recibir la cadena y ahora la va a comparar;
-
-
-//Si las letras coinciden, "iCoincide" sigue siendo 0. Si no, será igual a 1;
-
-               for(i=0;i<iTotalLetras;i++){       if( (msg_r[i] == msg_bien[i])&&(!iCoincidenFLAG) ){ }else{ iCoincidenFLAG=1; }       }
-//Terminó de comparar la cadena recibida con la que debería haber recibido;
-
-
-//Si coincidieron, la envía a scia y continua, pero si no, no;
-           if(!iCoincidenFLAG){ scia_msg(msg_r);}else{}                    //Hace el reenvio del primer mensaje;
-				iTotalLetras=0;
-          }//Ye se recibió el primer mensaje, si fue   «¿Cómo 0»;
-
-        }//Ye se recibió el primer mensaje. Si fue «Bien 0» sale del if, pero si no sale;
-
-//Hasta este punto ya se envió y recibió la frase completa.
-        //AQUÍ IRÍA EL DELAY ENTRE CADA ENVÍO AQUÍ IRÍA EL DELAY ENTRE CADA ENVÍO AQUÍ IRÍA EL DELAY ENTRE CADA ENVIO
-   }// Entonces se completan las 10 repeticiones de la frase;
-
-//Y luego ambas tarjetas debe mostrar el mensaje «Fin»
+       //b)
+       while(iCoincidenFLAG){ iCoincidenFLAG=0;
+            //c)
+            scic_rcv_msg(msg_r);
+            for(i=0;i<iLongitud;i++){       if( (msg_r[i] == msg_como[i])&&(!iCoincidenFLAG) ){ }else{ iCoincidenFLAG=1; }       }
+            //d)
+            if(!iCoincidenFLAG){ scia_msg(msg_r);}else{}
+           }
+       //e)
+       scic_msg(msg_estas); scia_msg(msg_estas);  iCoincidenFLAG=1;
+       //f)
+       while(iCoincidenFLAG){ iCoincidenFLAG=0;
+           //g)
+           scic_rcv_msg(msg_r);
+           for(i=0;i<iTotalLetras;i++){       if( (msg_r[i] == msg_bien[i])&&(!iCoincidenFLAG) ){ }else{ iCoincidenFLAG=1; }       }
+           //h)
+           if(!iCoincidenFLAG){ scia_msg(msg_r);}else{}
+          }
+   }//Repite otras 9 veces;
+   //k)
    scia_msg(msg_fin);  // __  y yaka bamos
 
 
@@ -296,8 +282,8 @@ B.3 Envía «fin» a scia
        //Logica para guardar la palabra recibida - ivan
        ReceivedChar = ScicRegs.SCIRXBUF.all;    //Se guarda el caracter contenido en el buffer en ReceivedChar
        if(ReceivedChar != '0'){                 //Si el caracter es diferente de '0'
-           msg_r[i] = ReceivedChar;             //este mismo se guarda en la posiciÃ³n i de msg_r
-           i++;                                 //Se utiliza una iteraciÃ³n para ir llenando los espacio de msg_r
+           msg_r[i] = ReceivedChar;             //este mismo se guarda en la posiciÃƒÂ³n i de msg_r
+           i++;                                 //Se utiliza una iteraciÃƒÂ³n para ir llenando los espacio de msg_r
        }
        else {                                   //Cuando el valor del caracter es '0', se deja de escribir en la cadena msg_r
            //Transmit message to SCIA
@@ -339,6 +325,22 @@ void scic_echoback_init()
     ScicRegs.SCILBAUD.all = 0x008B;
 
     ScicRegs.SCICTL1.all = 0x0023;  // Relinquish SCI from Reset
+}
+
+
+
+// Función para recibir mensajes
+void scic_rcv_msg(char *str)
+{
+    iLongitud = 0;      // Indice para el string
+
+    do
+        while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
+            ;
+    while ((str[iLongitud++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
+                                                            // caracter de fin de mensaje ('0') y sumar 1 al índice al terminar.
+
+    str[iLongitud - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
 }
 
 //
@@ -458,13 +460,13 @@ void scia_fifo_init()
            while(ScicRegs.SCIFFRX.bit.RXFFST == 0);
            ReceivedChar = ScicRegs.SCIRXBUF.all;
            if(ReceivedChar != '0'){ msg_r[iTotalLetras] = ReceivedChar; iTotalLetras++;}
-           else{                                                                //Terminó la cadena y ahora la va a comparar;
+           else{                                                                //TerminÃ³ la cadena y ahora la va a comparar;
             for(int i=0;i<iTotalLetras;i++){
-                                //Si las letras coinciden, iCoincide sigue siendo 0. Si no, será 1 y fin;
+                                //Si las letras coinciden, iCoincide sigue siendo 0. Si no, serÃ¡ 1 y fin;
                 if( (msg_r[i] == msg_PorRecibir[NumMsg][i])&&(!iCoincideFLAG) ){ }else{ iCoincideFLAG=1; }
-            }                                          //Terminó de comparar la cadena recibida con la que debería haber recibido;
-                            //Si coincidieron, la envía y continua, pero si no, no;
-            if(!iCoincideFLAG){ scia_msg(msg_r); NumMsg++; NumMsg*=!(NumMsg/1); }else{}  //Hace el envió y acutaliza el contador;
+            }                                          //TerminÃ³ de comparar la cadena recibida con la que deberÃ­a haber recibido;
+                            //Si coincidieron, la envÃ­a y continua, pero si no, no;
+            if(!iCoincideFLAG){ scia_msg(msg_r); NumMsg++; NumMsg*=!(NumMsg/1); }else{}  //Hace el enviÃ³ y acutaliza el contador;
 
            }
    }//*/
