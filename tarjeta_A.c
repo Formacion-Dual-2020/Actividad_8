@@ -95,7 +95,6 @@
 //
 // Globals
 //
-Uint16 LoopCount;
 
 //
 // Function Prototypes
@@ -104,7 +103,7 @@ void scic_echoback_init(void);
 void scic_fifo_init(void);
 void scic_xmit(int a);
 void scic_msg(char *msg);
-void scic_msg_r(char *msg_r);
+void scic_rcv_msg(char *str);
 
 //Parte agregada
 void scia_echoback_init(void);
@@ -118,9 +117,7 @@ void scia_msg(char *msg);
 //
 void main(void)
 {
-    Uint16 ReceivedChar;
-    char *msg, *msg_r;
-    int i=0;
+    char *msg, *rcvd_msg;
 
 //
 // Step 1. Initialize System Control:
@@ -142,16 +139,16 @@ void main(void)
 //  GPIO_SetupPinOptions() - Sets the direction and configuration of the GPIOS
 // These functions are found in the F2837xS_Gpio.c file.
 //
-   GPIO_SetupPinMux(89, GPIO_MUX_CPU1, 6);
-   GPIO_SetupPinOptions(89, GPIO_INPUT, GPIO_PUSHPULL);
    GPIO_SetupPinMux(90, GPIO_MUX_CPU1, 6);
-   GPIO_SetupPinOptions(90, GPIO_OUTPUT, GPIO_ASYNC);
+   GPIO_SetupPinOptions(90, GPIO_INPUT, GPIO_PUSHPULL);
+   GPIO_SetupPinMux(89, GPIO_MUX_CPU1, 6);
+   GPIO_SetupPinOptions(89, GPIO_OUTPUT, GPIO_ASYNC);
 
    //Configuracion Scia
-   GPIO_SetupPinMux(84, GPIO_MUX_CPU1, 5);
-   GPIO_SetupPinOptions(84, GPIO_INPUT, GPIO_PUSHPULL);
    GPIO_SetupPinMux(85, GPIO_MUX_CPU1, 5);
-   GPIO_SetupPinOptions(85, GPIO_OUTPUT, GPIO_ASYNC);
+   GPIO_SetupPinOptions(85, GPIO_INPUT, GPIO_PUSHPULL);
+   GPIO_SetupPinMux(84, GPIO_MUX_CPU1, 5);
+   GPIO_SetupPinOptions(84, GPIO_OUTPUT, GPIO_ASYNC);
 
 //
 // Step 3. Clear all __interrupts and initialize PIE vector table:
@@ -186,7 +183,6 @@ void main(void)
 //
 // Step 4. User specific code:
 //
-   LoopCount = 0;
 
    scic_fifo_init();       // Initialize the SCI_C FIFO
    scic_echoback_init();   // Initialize SCI_C for echoback
@@ -195,28 +191,41 @@ void main(void)
    scia_fifo_init();       // Initialize the SCI FIFO
    scia_echoback_init();
 
+
    msg = "Hola 0";
    scic_msg(msg);
 
    for(;;)
    {
-       while(ScicRegs.SCIFFRX.bit.RXFFST == 0) { } // wait for empty state
+       /*   Prueba con terminal
+       msg = "\n\rEnvia un mensaje con '0' al final";
+       scic_msg(msg);
 
-       //Logica para guardar la palabra recibida - ivan
-       ReceivedChar = ScicRegs.SCIRXBUF.all;    //Se guarda el caracter contenido en el buffer en ReceivedChar
-       if(ReceivedChar != '0'){                 //Si el caracter es diferente de '0'
-           msg_r[i] = ReceivedChar;             //este mismo se guarda en la posición i de msg_r
-           i++;                                 //Se utiliza una iteración para ir llenando los espacio de msg_r
-       }
-       else {                                   //Cuando el valor del caracter es '0', se deja de escribir en la cadena msg_r
-           //Transmit message to SCIA
-           scia_msg(msg_r);                     //se escribe la palabra recibida en la consola de CCS
-           i = 0;                               //Se reinicia el contador para cuando se reciba otra palabra
-       }
-       // - ivan
+       scic_rcv_msg(rcvd_msg);
 
-       LoopCount++;
+       msg = "\n\rEnviaste: ";
+       scia_msg(msg);
+       scic_msg(msg);
+       scia_msg(rcvd_msg);
+       scic_msg(rcvd_msg);
+       */
+       scic_rcv_msg(rcvd_msg);
+       scic_msg(rcvd_msg);
    }
+}
+
+// Función para recibir mensajes
+void scic_rcv_msg(char *str)
+{
+    int i = 0;      // Indice para el string
+
+    do
+        while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
+            ;
+    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
+                                                            // caracter de fin de mensaje ('0') y sumar 1 al índice al terminar.
+
+    str[i - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
 }
 
 //
@@ -256,13 +265,13 @@ void scic_echoback_init()
 void scic_xmit(int a)
 {
     while (ScicRegs.SCIFFTX.bit.TXFFST != 0) {}
-    ScicRegs.SCITXBUF.all =a;
+    ScicRegs.SCITXBUF.all = a;
 }
 
 //
 // scia_msg - Transmit message via SCIA
 //
-void scic_msg(char * msg)
+void scic_msg(char *msg)
 {
     int i;
     i = 0;
