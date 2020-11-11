@@ -197,24 +197,12 @@ void main(void)
 
    for(;;)
    {
-       /*   Prueba con terminal
-       msg = "\n\rEnvia un mensaje con '0' al final";
-       scic_msg(msg);
-
-       scic_rcv_msg(rcvd_msg);
-
-       msg = "\n\rEnviaste: ";
-       scia_msg(msg);
-       scic_msg(msg);
-       scia_msg(rcvd_msg);
-       scic_msg(rcvd_msg);
-       */
        scic_rcv_msg(rcvd_msg);
        scic_msg(rcvd_msg);
    }
 }
 
-// Función para recibir mensajes
+// Funciï¿½n para recibir mensajes
 void scic_rcv_msg(char *str)
 {
     int i = 0;      // Indice para el string
@@ -223,7 +211,7 @@ void scic_rcv_msg(char *str)
         while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
             ;
     while ((str[i++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
-                                                            // caracter de fin de mensaje ('0') y sumar 1 al índice al terminar.
+                                                            // caracter de fin de mensaje ('0') y sumar 1 al ï¿½ndice al terminar.
 
     str[i - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
 }
