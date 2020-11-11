@@ -112,12 +112,16 @@ void scia_xmit(int a);
 void scia_msg(char *msg);
 //fin de agregado
 
+//Función para comparar strings
+int compare_msg(char *rec , char *exp);
+
 //
 // Main
 //
 void main(void)
 {
-    char *msg, *rcvd_msg;
+    char *msg, *rcvd_msg, *emsg1, *emsg2;
+    int compare_res, i;
 
 //
 // Step 1. Initialize System Control:
@@ -192,14 +196,45 @@ void main(void)
    scia_echoback_init();
 
 
-   msg = "Hola 0";
+   emsg1 = "como ";
+   emsg2 = "bien. ";
+
+   DELAY_US(3000000);
+
+   msg = "Hola \0";
+   scia_msg(msg);
    scic_msg(msg);
 
-   for(;;)
+   for(i = 0 ; i < 20 ; i++)
    {
        scic_rcv_msg(rcvd_msg);
-       scic_msg(rcvd_msg);
+       scia_msg(rcvd_msg);
+
+       if(i == 19)
+           rcvd_msg = "0";
+
+       //Comparacion de los strings
+       compare_res = compare_msg(rcvd_msg , emsg1);
+
+       if (compare_res == 0){
+           msg = "estas? \0";
+           scic_msg(msg);
+           scia_msg(msg);
+       }
+
+       //comparacion del otro string
+       compare_res = compare_msg(rcvd_msg , emsg2);
+
+       if (compare_res == 0){
+           DELAY_US(2000000);
+           msg = "Hola \0";
+           scic_msg(msg);
+           scia_msg(msg);
+       }
    }
+   msg = "fin\0";
+   scia_msg(msg);
+   scic_msg(msg);
 }
 
 // Funci�n para recibir mensajes
@@ -210,7 +245,7 @@ void scic_rcv_msg(char *str)
     do
         while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
             ;
-    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
+    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '\0');      // Asignar el valor en el buffer al string, comparar con el
                                                             // caracter de fin de mensaje ('0') y sumar 1 al �ndice al terminar.
 
     str[i - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
@@ -338,6 +373,22 @@ void scia_fifo_init()
     SciaRegs.SCIFFTX.all = 0xE040;
     SciaRegs.SCIFFRX.all = 0x2044;
     SciaRegs.SCIFFCT.all = 0x0;
+}
+
+//funcion para comparar strings
+int compare_msg(char *rec, char *exp) {
+   while (*rec == *exp) {
+      if (*rec == '\0' || *exp == '\0')
+         break;
+
+      rec++;
+      exp++;
+   }
+
+   if (*rec == '\0' && *exp == '\0')
+      return 0;
+   else
+      return -1;
 }
 
 //

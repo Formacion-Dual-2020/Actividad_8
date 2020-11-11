@@ -110,12 +110,16 @@ void scic_fifo_init(void);
 void scic_xmit(int a);
 void scic_msg(char *msg);
 
+//Función para comparar strings
+int compare_msg(char *rec , char *exp);
+
 //
 // Main
 //
 void main(void)
 {
-    char *msg, *rcvd_msg;
+    char *msg, *rcvd_msg, *emsg1, *emsg2;
+    int compare_res;
 
 //
 // Step 1. Initialize System Control:
@@ -190,14 +194,31 @@ void main(void)
    scic_fifo_init();       // Initialize the SCI FIFO
    scic_echoback_init();   // Initialize SCI for echoback
 
+   emsg1 = "Hola ";
+   emsg2 = "estas? ";
+
    for(;;)
    {
-      scic_rcv_msg(rcvd_msg);
+       scic_rcv_msg(rcvd_msg);
+       scia_msg(rcvd_msg);
 
-      msg = "\n\rRecibi: ";
-      scia_msg(msg);
-      scia_msg(rcvd_msg);
-      scic_msg(rcvd_msg);
+       //Comparacion de los strings
+       compare_res = compare_msg(rcvd_msg , emsg1);
+
+       if (compare_res == 0){
+           msg = "como \0";
+           scic_msg(msg);
+           scia_msg(msg);
+       }
+
+       //comparacion del otro string
+       compare_res = compare_msg(rcvd_msg , emsg2);
+
+       if (compare_res == 0){
+           msg = "bien. \0";
+           scic_msg(msg);
+           scia_msg(msg);
+       }
    }
 }
 
@@ -210,7 +231,7 @@ void scic_rcv_msg(char *str)
     do
         while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
             ;
-    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
+    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '\0');      // Asignar el valor en el buffer al string, comparar con el
                                                             // caracter de fin de mensaje ('0') y sumar 1 al índice al terminar.
 
     str[i - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
@@ -330,6 +351,22 @@ void scic_fifo_init()
     ScicRegs.SCIFFTX.all = 0xE040;
     ScicRegs.SCIFFRX.all = 0x2044;
     ScicRegs.SCIFFCT.all = 0x0;
+}
+
+//funcion para comparar strings
+int compare_msg(char *rec, char *exp) {
+   while (*rec == *exp) {
+      if (*rec == '\0' || *exp == '\0')
+         break;
+
+      rec++;
+      exp++;
+   }
+
+   if (*rec == '\0' && *exp == '\0')
+      return 0;
+   else
+      return -1;
 }
 
 //
