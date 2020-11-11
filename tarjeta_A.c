@@ -93,7 +93,7 @@
 #include "F28x_Project.h"
 #include "string.h"
 
-#define STR_ARR_SIZE        4
+#define STR_ARR_SIZE        4           // Número de strings en el vector msg
 //
 // Globals
 //
@@ -119,9 +119,9 @@ void scia_msg(char *msg);
 //
 void main(void)
 {
-    char rcvd_msg[10] = "";
-    char msg[STR_ARR_SIZE][10] = {"Hola ", "como ", "estas? ", "bien."};
-    int i = 0, it = 0;
+    char rcvd_msg[10] = "";     // string para recivir mensajes
+    char msg[STR_ARR_SIZE][10] = {"Hola ", "como ", "estas? ", "bien."};    // Array con strings
+    int i = 0, it = 0;          // i se usa para avanzar en el array msg, it para contar las iteraciones.
 //
 // Step 1. Initialize System Control:
 // PLL, WatchDog, enable Peripheral Clocks
@@ -194,36 +194,36 @@ void main(void)
    scia_fifo_init();       // Initialize the SCI FIFO
    scia_echoback_init();
 
-   DELAY_US(1000000);
+   DELAY_US(1000000);       // Delay inicial, 1 segundo más que el delay entre mensajes.
 
    while(it < 10)
    {
-       if (!i)
+       if (i == 0)      // Si i es igual a 0
        {
            scia_msg("\n\r");
-           scia_xmit(it + '0');
-           scia_msg(". ");
+           scia_xmit(it + '0');         // Ascii (0 - 9)
+           scia_msg(". ");              // Formato de presentación (tres lineas anteriores)
 
-           DELAY_US(2000000);
+           DELAY_US(2000000);           // Delay 2s
            scia_msg(msg[i]);
-           scic_msg(msg[i++]);
+           scic_msg(msg[i++]);          // Mensaje inicial
        }
 
-       scic_rcv_msg(rcvd_msg);
+       scic_rcv_msg(rcvd_msg);          // Esperar recepción de mensaje
 
-       if (!strcmp(msg[i], rcvd_msg))
+       if (strcmp(msg[i], rcvd_msg) == 0)   // Si los strings son iguales
        {
-           scia_msg(msg[i++]);
-           if (i < STR_ARR_SIZE)
+           scia_msg(rcvd_msg);              // Enviar mensaje recibido
+           if (++i < STR_ARR_SIZE)          // Comprobar que existe un string disponible en el array
            {
                DELAY_US(2000000);
-               scia_msg(msg[i]);
-               scic_msg(msg[i++]);
+               scia_msg(msg[i]);            // Enviar siguiente string
+               scic_msg(msg[i++]);          //
            }
-           else
+           else     // El array de strings fue transmitido/recibido por completo.
            {
-               i = 0;
-               it++;
+               i = 0;       // Reiniciar índice del array de strings
+               it++;        // Sumar uno a la iteración.
            }
        }
    }
@@ -296,7 +296,7 @@ void scic_msg(char *msg)
         scic_xmit(msg[i]);
         i++;
     }
-    scic_xmit('\x04');
+    scic_xmit('\x04');  // Agregar el ASCII 0x04 (End of Transmission)
 }
 
 //
