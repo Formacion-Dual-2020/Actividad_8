@@ -91,7 +91,9 @@
 // Included Files
 //
 #include "F28x_Project.h"
+#include "string.h"
 
+#define STR_ARR_SIZE        4
 //
 // Globals
 //
@@ -117,8 +119,9 @@ void scia_msg(char *msg);
 //
 void main(void)
 {
-    char *msg, *rcvd_msg;
-
+    char rcvd_msg[10] = "";
+    char msg[STR_ARR_SIZE][10] = {"Hola ", "como ", "estas? ", "bien."};
+    int i = 0, it = 0;
 //
 // Step 1. Initialize System Control:
 // PLL, WatchDog, enable Peripheral Clocks
@@ -191,26 +194,33 @@ void main(void)
    scia_fifo_init();       // Initialize the SCI FIFO
    scia_echoback_init();
 
-
-   msg = "Hola 0";
-   scic_msg(msg);
-
-   for(;;)
+   while(it < 10)
    {
-       /*   Prueba con terminal
-       msg = "\n\rEnvia un mensaje con '0' al final";
-       scic_msg(msg);
+       if (!i)
+       {
+           scia_msg("\n\r");
+           scia_xmit(it + '1');
+           scia_msg(". ");
+           scia_msg(msg[i]);
+           scic_msg(msg[i++]);
+       }
 
        scic_rcv_msg(rcvd_msg);
 
-       msg = "\n\rEnviaste: ";
-       scia_msg(msg);
-       scic_msg(msg);
-       scia_msg(rcvd_msg);
-       scic_msg(rcvd_msg);
-       */
-       scic_rcv_msg(rcvd_msg);
-       scic_msg(rcvd_msg);
+       if (!strcmp(msg[i], rcvd_msg))
+       {
+           scia_msg(msg[i++]);
+           if (i < STR_ARR_SIZE)
+           {
+               scia_msg(msg[i]);
+               scic_msg(msg[i++]);
+           }
+           else
+           {
+               i = 0;
+               it++;
+           }
+       }
    }
 }
 
@@ -220,9 +230,9 @@ void scic_rcv_msg(char *str)
     int i = 0;      // Indice para el string
 
     do
-        while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
+        while(!ScicRegs.SCIFFRX.bit.RXFFST)         // Esperar a que el buffer reciba por lo menos un byte.
             ;
-    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
+    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '\x04');      // Asignar el valor en el buffer al string, comparar con el
                                                             // caracter de fin de mensaje ('0') y sumar 1 al índice al terminar.
 
     str[i - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
@@ -264,7 +274,8 @@ void scic_echoback_init()
 //
 void scic_xmit(int a)
 {
-    while (ScicRegs.SCIFFTX.bit.TXFFST != 0) {}
+    while (ScicRegs.SCIFFTX.bit.TXFFST != 0)
+        ;
     ScicRegs.SCITXBUF.all = a;
 }
 
@@ -273,13 +284,14 @@ void scic_xmit(int a)
 //
 void scic_msg(char *msg)
 {
-    int i;
-    i = 0;
+    int i = 0;
+
     while(msg[i] != '\0')
     {
         scic_xmit(msg[i]);
         i++;
     }
+    scic_xmit('\x04');
 }
 
 //
@@ -324,8 +336,9 @@ void scia_echoback_init()
 //
 void scia_xmit(int a)
 {
-    while (SciaRegs.SCIFFTX.bit.TXFFST != 0) {}
-    SciaRegs.SCITXBUF.all =a;
+    while (SciaRegs.SCIFFTX.bit.TXFFST != 0)
+        ;
+    SciaRegs.SCITXBUF.all = a;
 }
 
 //
