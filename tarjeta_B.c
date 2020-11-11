@@ -219,6 +219,7 @@ void main(void)
           it++;
       }
    }
+   scia_msg("Fin");
 }
 
 
