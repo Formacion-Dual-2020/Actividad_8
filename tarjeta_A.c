@@ -194,13 +194,17 @@ void main(void)
    scia_fifo_init();       // Initialize the SCI FIFO
    scia_echoback_init();
 
+   DELAY_US(1000000);
+
    while(it < 10)
    {
        if (!i)
        {
            scia_msg("\n\r");
-           scia_xmit(it + '1');
+           scia_xmit(it + '0');
            scia_msg(". ");
+
+           DELAY_US(2000000);
            scia_msg(msg[i]);
            scic_msg(msg[i++]);
        }
@@ -212,6 +216,7 @@ void main(void)
            scia_msg(msg[i++]);
            if (i < STR_ARR_SIZE)
            {
+               DELAY_US(2000000);
                scia_msg(msg[i]);
                scic_msg(msg[i++]);
            }
