@@ -91,6 +91,9 @@
 // Included Files
 //
 #include "F28x_Project.h"
+#include "string.h"
+
+#define STR_ARR_SIZE        4           // Número de strings en el vector msg
 
 //
 // Globals
@@ -115,7 +118,9 @@ void scic_msg(char *msg);
 //
 void main(void)
 {
-    char *msg, *rcvd_msg;
+    char rcvd_msg[10] = "";     // string para recivir mensajes
+    char msg[STR_ARR_SIZE][10] = {"Hola ", "como ", "estas? ", "bien."};    // Array con strings
+    int i = 0, it = 0;          // i se usa para avanzar en el array msg, it para contar las iteraciones.
 
 //
 // Step 1. Initialize System Control:
@@ -145,10 +150,10 @@ void main(void)
    GPIO_SetupPinOptions(89, GPIO_OUTPUT, GPIO_ASYNC);
 
    //Config SCIA
-   GPIO_SetupPinMux(84, GPIO_MUX_CPU1, 5);
-   GPIO_SetupPinOptions(84, GPIO_INPUT, GPIO_PUSHPULL);
    GPIO_SetupPinMux(85, GPIO_MUX_CPU1, 5);
-   GPIO_SetupPinOptions(85, GPIO_OUTPUT, GPIO_ASYNC);
+   GPIO_SetupPinOptions(85, GPIO_INPUT, GPIO_PUSHPULL);
+   GPIO_SetupPinMux(84, GPIO_MUX_CPU1, 5);
+   GPIO_SetupPinOptions(84, GPIO_OUTPUT, GPIO_ASYNC);
 
 //
 // Step 3. Clear all __interrupts and initialize PIE vector table:
@@ -190,14 +195,37 @@ void main(void)
    scic_fifo_init();       // Initialize the SCI FIFO
    scic_echoback_init();   // Initialize SCI for echoback
 
-   for(;;)
+   while (it < 10)
    {
+      if (i == 0)      // Si i es igual a 0
+      {
+          scia_msg("\n\r");
+          scia_xmit(it + '0');         // Ascii (0 - 9)
+          scia_msg(". ");              // Formato de presentación (tres lineas anteriores)
+      }
+
       scic_rcv_msg(rcvd_msg);
 
-      msg = "\n\rRecibi: ";
-      scia_msg(msg);
-      scia_msg(rcvd_msg);
-      scic_msg(rcvd_msg);
+      if (strcmp(msg[i], rcvd_msg) == 0)   // Si los strings son iguales
+     {
+         scia_msg(rcvd_msg);              // Enviar mensaje recibido
+         DELAY_US(2000000);
+         scia_msg(msg[++i]);            // Enviar siguiente string
+         scic_msg(msg[i++]);          //
+
+     }
+      if (i >= 4)
+      {
+          i = 0;
+          it++;
+      }
+      /*
+     else     // El array de strings fue transmitido/recibido por completo.
+     {
+         i = 0;       // Reiniciar índice del array de strings
+         it++;        // Sumar uno a la iteración.
+     }
+     */
    }
 }
 
@@ -210,7 +238,7 @@ void scic_rcv_msg(char *str)
     do
         while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
             ;
-    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
+    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '\x04');      // Asignar el valor en el buffer al string, comparar con el
                                                             // caracter de fin de mensaje ('0') y sumar 1 al índice al terminar.
 
     str[i - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
@@ -280,13 +308,13 @@ void scic_echoback_init()
 void scia_xmit(int a)
 {
     while (SciaRegs.SCIFFTX.bit.TXFFST != 0) {}
-    SciaRegs.SCITXBUF.all =a;
+    SciaRegs.SCITXBUF.all = a;
 }
 
 void scic_xmit(int a)
 {
     while (ScicRegs.SCIFFTX.bit.TXFFST != 0) {}
-    ScicRegs.SCITXBUF.all =a;
+    ScicRegs.SCITXBUF.all = a;
 }
 
 //
@@ -313,6 +341,7 @@ void scic_msg(char * msg)
         scic_xmit(msg[i]);
         i++;
     }
+    scic_xmit('\x04');
 }
 
 //
