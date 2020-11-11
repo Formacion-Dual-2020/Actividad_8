@@ -95,51 +95,38 @@
 //
 // Globals
 //
+Uint16 LoopCount;
 
 //
 // Function Prototypes
 //
 void delay_loop(void);
-void scic_echoback_init(void);
-void scic_fifo_init(void);
-void scic_xmit(int a);
-void scic_msg(char *msg);
-void scic_rcv_msg(char *str);
-
-//Parte agregada
 void scia_echoback_init(void);
 void scia_fifo_init(void);
 void scia_xmit(int a);
 void scia_msg(char *msg);
-//fin de agregado
+
+void scic_echoback_init(void);
+void scic_fifo_init(void);
+void scic_xmit(int a);
+void scic_msg(char *msg);
 
 //
 // Main
 //
-<<<<<<< HEAD
-void main(void)
-{
-    char *msg, *rcvd_msg;
-
-//
-// Step 1. Initialize System Control:
-// PLL, WatchDog, enable Peripheral Clocks
-// This example function is found in the F2837xS_SysCtrl.c file.
-//
-   InitSysCtrl();
-=======
 int iLongitud = 0;
 void main(void)
 {
-    //Uint16 ReceivedChar;
+    Uint16 ReceivedChar;
     char *msg_hola, *msg_como, *msg_estas, *msg_bien, *msg_fin, *msg_r;
     int i = 0;
+
+    //
     // Step 1. Initialize System Control:
     // PLL, WatchDog, enable Peripheral Clocks
     // This example function is found in the F2837xS_SysCtrl.c file.
     //
     InitSysCtrl();
->>>>>>> 115aca1 (delays)
 
     //
     // Step 2. Initialize GPIO:
@@ -148,41 +135,24 @@ void main(void)
     //
     InitGpio();
 
-<<<<<<< HEAD
-//
-// For this example, only init the pins for the SCI-A port.
-//  GPIO_SetupPinMux() - Sets the GPxMUX1/2 and GPyMUX1/2 register bits
-//  GPIO_SetupPinOptions() - Sets the direction and configuration of the GPIOS
-// These functions are found in the F2837xS_Gpio.c file.
-//
-   GPIO_SetupPinMux(90, GPIO_MUX_CPU1, 6);
-   GPIO_SetupPinOptions(90, GPIO_INPUT, GPIO_PUSHPULL);
-   GPIO_SetupPinMux(89, GPIO_MUX_CPU1, 6);
-   GPIO_SetupPinOptions(89, GPIO_OUTPUT, GPIO_ASYNC);
-
-   //Configuracion Scia
-   GPIO_SetupPinMux(85, GPIO_MUX_CPU1, 5);
-   GPIO_SetupPinOptions(85, GPIO_INPUT, GPIO_PUSHPULL);
-   GPIO_SetupPinMux(84, GPIO_MUX_CPU1, 5);
-   GPIO_SetupPinOptions(84, GPIO_OUTPUT, GPIO_ASYNC);
-=======
     //
     // For this example, only init the pins for the SCI-A port.
     //  GPIO_SetupPinMux() - Sets the GPxMUX1/2 and GPyMUX1/2 register bits
     //  GPIO_SetupPinOptions() - Sets the direction and configuration of the GPIOS
     // These functions are found in the F2837xS_Gpio.c file.
     //
-    GPIO_SetupPinMux(89, GPIO_MUX_CPU1, 6);
-    GPIO_SetupPinOptions(89, GPIO_INPUT, GPIO_PUSHPULL);
-    GPIO_SetupPinMux(90, GPIO_MUX_CPU1, 6);
-    GPIO_SetupPinOptions(90, GPIO_OUTPUT, GPIO_ASYNC);
 
-    //Configuracion Scia
+    //Config SCIC
+    GPIO_SetupPinMux(90, GPIO_MUX_CPU1, 6);
+    GPIO_SetupPinOptions(90, GPIO_INPUT, GPIO_PUSHPULL);
+    GPIO_SetupPinMux(89, GPIO_MUX_CPU1, 6);
+    GPIO_SetupPinOptions(89, GPIO_OUTPUT, GPIO_ASYNC);
+
+    //Config SCIA
     GPIO_SetupPinMux(84, GPIO_MUX_CPU1, 5);
     GPIO_SetupPinOptions(84, GPIO_INPUT, GPIO_PUSHPULL);
     GPIO_SetupPinMux(85, GPIO_MUX_CPU1, 5);
     GPIO_SetupPinOptions(85, GPIO_OUTPUT, GPIO_ASYNC);
->>>>>>> 115aca1 (delays)
 
     //
     // Step 3. Clear all __interrupts and initialize PIE vector table:
@@ -214,61 +184,17 @@ void main(void)
     //
     InitPieVectTable();
 
-<<<<<<< HEAD
-//
-// Step 4. User specific code:
-//
-=======
     //
     // Step 4. User specific code:
+
     //
-    LoopCount = 0;
->>>>>>> 115aca1 (delays)
 
-    scic_fifo_init();     // Initialize the SCI_C FIFO
-    scic_echoback_init(); // Initialize SCI_C for echoback
+    scia_fifo_init();     // Initialize the SCI FIFO
+    scia_echoback_init(); // Initialize SCI for echoback
 
-    //SCIA initialize
-    scia_fifo_init(); // Initialize the SCI FIFO
-    scia_echoback_init();
+    scic_fifo_init();     // Initialize the SCI FIFO
+    scic_echoback_init(); // Initialize SCI for echoback
 
-<<<<<<< HEAD
-
-   msg = "Hola 0";
-   scic_msg(msg);
-
-   for(;;)
-   {
-       /*   Prueba con terminal
-       msg = "\n\rEnvia un mensaje con '0' al final";
-       scic_msg(msg);
-
-       scic_rcv_msg(rcvd_msg);
-
-       msg = "\n\rEnviaste: ";
-       scia_msg(msg);
-       scic_msg(msg);
-       scia_msg(rcvd_msg);
-       scic_msg(rcvd_msg);
-       */
-       scic_rcv_msg(rcvd_msg);
-       scic_msg(rcvd_msg);
-   }
-}
-
-// Funci�n para recibir mensajes
-void scic_rcv_msg(char *str)
-{
-    int i = 0;      // Indice para el string
-
-    do
-        while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
-            ;
-    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
-                                                            // caracter de fin de mensaje ('0') y sumar 1 al �ndice al terminar.
-
-    str[i - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
-=======
     void delay_loop()
     {
         short i;
@@ -283,7 +209,6 @@ void scic_rcv_msg(char *str)
 A.1 Escribe Â«Hola 0Â» al scia y al scic
 
 B.1 Recibe Â«Hola 0Â» y lo manda a scia, responde Â«Â¿cÃ³mo 0Â» a scia y scic
-
 
 A.2 Recibe Â«Â¿cÃ³mo 0Â» y lo manda a scia, responde Â«estÃ¡s? 0Â» a scia y scic
 
@@ -302,78 +227,43 @@ B.3 EnvÃ­a Â«finÂ» a scia
     */
 
     msg_hola = "Hola 0";
-    msg_como = "¿Cómo 0";
-    msg_estas = "estás? 0";
+    msg_como = "Â¿CÃ³mo 0";
+    msg_estas = "estÃ¡s? 0";
     msg_bien = "Bien. 0";
     msg_fin = "Fin.";
 
     int iTotalLetras = 0, iCoincidenFLAG = 1, NumMsg = 0, irepeticion = 0;
 
+    DELAY_US(3000);
     for (irepeticion = 0; irepeticion < 10; irepeticion++)
     {
-
         /*Lo que hace es:
-        * (1)─Hola
-        *            (2)─¿Cómo
-        * (3)─estás?
-        *            (4)─Bien.
+        *            (1)─Hola
+        * (2)─¿Cómo
+        *            (3)─estás?
+        * (4)─Bien.
         *───────────────again x9;
         * ─Fin       ─Fin.
-        * a) Envía mensaje (1).
-        * b) Espera hasta que le envíen un mensaje igual a (2).
-        * c)      Compara cada vez al recibido;
-        * d) Cuando recibe exactamente (2) lo envía por SCIA;
-        * e) Ahora envía (3);
-        * f) Espera hasta recibir un mensaje igual a (4);
-        * g)      Comprobará cadad vez al recibido;
-        * h) Cuando recibe exactamente (4) lo envía por SCIA;
+        * a) Espera hasta que le envíen un mensaje igual a (1).
+        * b)      Compara cada vez al recibido;
+        * c) Cuando recibe exactamente (1) lo envía por SCIA;
+        * d) Envía mensaje (2).
+        * e) Espera hasta recibir un mensaje igual a (3);
+        * f)      Comprobará cadad vez al recibido;
+        * g) Cuando recibe exactamente (3) lo envía por SCIA;
+        * h) Ahora envía (4);
         ──────────────────Repite otra nueve veces;
         * k) Finalmente envía Fin. por SCIA
         */
         //a)
-        DELAY_US(3000);
-        // scic_msg(msg_hola);
-        scia_msg(msg_hola);
-        //b)
         while (iCoincidenFLAG)
         {
             iCoincidenFLAG = 0;
-            //c)
-            scic_rcv_msg(msg_r);
-            for (i = 0; i < iLongitud; i++)
-            {
-                if ((msg_r[i] == msg_como[i]) && (!iCoincidenFLAG))
-                {
-                }
-                else
-                {
-                    iCoincidenFLAG = 1;
-                }
-            }
-            //d)
-            if (!iCoincidenFLAG)
-            {
-                delay_loop();
-                scia_msg(msg_r);
-            }
-            else
-            {
-            }
-        }
-        //e)
-        delay_loop();
-        scic_msg(msg_estas);
-        scia_msg(msg_estas);
-        iCoincidenFLAG = 1;
-        //f)
-        while (iCoincidenFLAG)
-        {
-            iCoincidenFLAG = 0;
-            //g)
+            //b)
             scic_rcv_msg(msg_r);
             for (i = 0; i < iTotalLetras; i++)
             {
-                if ((msg_r[i] == msg_bien[i]) && (!iCoincidenFLAG))
+                if ((msg_r[i] == msg_hola[i]) && (!iCoincidenFLAG))
                 {
                 }
                 else
@@ -381,7 +271,7 @@ B.3 EnvÃ­a Â«finÂ» a scia
                     iCoincidenFLAG = 1;
                 }
             }
-            //h)
+            //c)
             if (!iCoincidenFLAG)
             {
                 delay_loop();
@@ -391,46 +281,47 @@ B.3 EnvÃ­a Â«finÂ» a scia
             {
             }
         }
-    } //Repite otras 9 veces;
+        //d)
+
+        delay_loop();
+        scic_msg(msg_como);
+        scia_msg(msg_como);
+        iCoincidenFLAG = 1;
+        //e)
+        while (iCoincidenFLAG)
+        {
+            iCoincidenFLAG = 0;
+            //f)
+            scic_rcv_msg(msg_r);
+            for (i = 0; i < iTotalLetras; i++)
+            {
+                if ((msg_r[i] == msg_estas[i]) && (!iCoincidenFLAG))
+                {
+                }
+                else
+                {
+                    iCoincidenFLAG = 1;
+                }
+            }
+            //g)
+            if (!iCoincidenFLAG)
+            {   delay_loop();
+                scia_msg(msg_r);
+            }
+            else
+            {
+            }
+        }
+        //h)
+        delay_loop();
+        scic_msg(msg_bien);
+        scia_msg(msg_bien);
+    }
     //k)
     delay_loop();
     scia_msg(msg_fin); // __  y yaka bamos
->>>>>>> 115aca1 (delays)
 }
 
-//
-//  scia_echoback_init - Test 1,SCIA  DLB, 8-bit word, baud rate 0x000F,
-//                       default, 1 STOP bit, no parity
-//
-void scic_echoback_init()
-{
-    //
-    // Note: Clocks were turned on to the SCIA peripheral
-    // in the InitSysCtrl() function
-    //
-
-    ScicRegs.SCICCR.all = 0x0007;  // 1 stop bit,  No loopback
-                                   // No parity,8 char bits,
-                                   // async mode, idle-line protocol
-    ScicRegs.SCICTL1.all = 0x0003; // enable TX, RX, internal SCICLK,
-                                   // Disable RX ERR, SLEEP, TXWAKE
-    ScicRegs.SCICTL2.all = 0x0003;
-    ScicRegs.SCICTL2.bit.TXINTENA = 1;
-    ScicRegs.SCICTL2.bit.RXBKINTENA = 1;
-
-    //
-    // SCIA at 9600 baud
-    // @LSPCLK = 50 MHz (200 MHz SYSCLK) HBAUD = 0x02 and LBAUD = 0x8B.
-    // @LSPCLK = 30 MHz (120 MHz SYSCLK) HBAUD = 0x01 and LBAUD = 0x86.
-    //
-    ScicRegs.SCIHBAUD.all = 0x0002;
-    ScicRegs.SCILBAUD.all = 0x008B;
-
-    ScicRegs.SCICTL1.all = 0x0023; // Relinquish SCI from Reset
-}
-
-<<<<<<< HEAD
-=======
 // Función para recibir mensajes
 void scic_rcv_msg(char *str)
 {
@@ -445,46 +336,10 @@ void scic_rcv_msg(char *str)
     str[iLongitud - 1] = '\0'; // Asignar el caracter nulo al final del string.
 }
 
->>>>>>> 115aca1 (delays)
 //
-// scia_xmit - Transmit a character from the SCI
+//  scia_echoback_init - Test 1,SCIA  DLB, 8-bit word, baud rate 0x000F,
+//                       default, 1 STOP bit, no parity
 //
-void scic_xmit(int a)
-{
-<<<<<<< HEAD
-    while (ScicRegs.SCIFFTX.bit.TXFFST != 0) {}
-=======
-    while (ScicRegs.SCIFFTX.bit.TXFFST != 0)
-    {
-    }
->>>>>>> 115aca1 (delays)
-    ScicRegs.SCITXBUF.all = a;
-}
-
-//
-// scia_msg - Transmit message via SCIA
-//
-void scic_msg(char *msg)
-{
-    int i;
-    i = 0;
-    while (msg[i] != '\0')
-    {
-        scic_xmit(msg[i]);
-        i++;
-    }
-}
-
-//
-// scia_fifo_init - Initialize the SCI FIFO
-//
-void scic_fifo_init()
-{
-    ScicRegs.SCIFFTX.all = 0xE040;
-    ScicRegs.SCIFFRX.all = 0x2044;
-    ScicRegs.SCIFFCT.all = 0x0;
-}
-
 void scia_echoback_init()
 {
     //
@@ -512,6 +367,33 @@ void scia_echoback_init()
     SciaRegs.SCICTL1.all = 0x0023; // Relinquish SCI from Reset
 }
 
+void scic_echoback_init()
+{
+    //
+    // Note: Clocks were turned on to the SCIA peripheral
+    // in the InitSysCtrl() function
+    //
+
+    ScicRegs.SCICCR.all = 0x0007;  // 1 stop bit,  No loopback
+                                   // No parity,8 char bits,
+                                   // async mode, idle-line protocol
+    ScicRegs.SCICTL1.all = 0x0003; // enable TX, RX, internal SCICLK,
+                                   // Disable RX ERR, SLEEP, TXWAKE
+    ScicRegs.SCICTL2.all = 0x0003;
+    ScicRegs.SCICTL2.bit.TXINTENA = 1;
+    ScicRegs.SCICTL2.bit.RXBKINTENA = 1;
+
+    //
+    // SCIA at 9600 baud
+    // @LSPCLK = 50 MHz (200 MHz SYSCLK) HBAUD = 0x02 and LBAUD = 0x8B.
+    // @LSPCLK = 30 MHz (120 MHz SYSCLK) HBAUD = 0x01 and LBAUD = 0x86.
+    //
+    ScicRegs.SCIHBAUD.all = 0x0002;
+    ScicRegs.SCILBAUD.all = 0x008B;
+
+    ScicRegs.SCICTL1.all = 0x0023; // Relinquish SCI from Reset
+}
+
 //
 // scia_xmit - Transmit a character from the SCI
 //
@@ -521,6 +403,14 @@ void scia_xmit(int a)
     {
     }
     SciaRegs.SCITXBUF.all = a;
+}
+
+void scic_xmit(int a)
+{
+    while (ScicRegs.SCIFFTX.bit.TXFFST != 0)
+    {
+    }
+    ScicRegs.SCITXBUF.all = a;
 }
 
 //
@@ -537,6 +427,17 @@ void scia_msg(char *msg)
     }
 }
 
+void scic_msg(char *msg)
+{
+    int i;
+    i = 0;
+    while (msg[i] != '\0')
+    {
+        scic_xmit(msg[i]);
+        i++;
+    }
+}
+
 //
 // scia_fifo_init - Initialize the SCI FIFO
 //
@@ -547,39 +448,13 @@ void scia_fifo_init()
     SciaRegs.SCIFFCT.all = 0x0;
 }
 
+void scic_fifo_init()
+{
+    ScicRegs.SCIFFTX.all = 0xE040;
+    ScicRegs.SCIFFRX.all = 0x2044;
+    ScicRegs.SCIFFCT.all = 0x0;
+}
+
 //
 // End of file
 //
-<<<<<<< HEAD
-=======
-
-///////////////77 INICIA EL CEMENTERIO INICIA EL CEMENTERIO INICIA EL CEMENTERIO  INICA EL CEMENTERIO
-///
-
-//*/
-
-/*
-   for(int irepeticion=0;irepeticion<10;irepeticion++){
-
-       //Escribe mensaje 1/2 en ambas terminales;
-       scic_msg(msg[NumMsg]); scia_msg(msg[NumMsg]);
-
-       //Recibe mensaje 1/2 caracter por caracter;
-           while(){iTotalLetras=0;}                                             //Clears received string length
-                                                  //Ahorarecibe caracter por caracter, el contaor de caracteres es iTotalLetras;
-           while(ScicRegs.SCIFFRX.bit.RXFFST == 0);
-           ReceivedChar = ScicRegs.SCIRXBUF.all;
-           if(ReceivedChar != '0'){ msg_r[iTotalLetras] = ReceivedChar; iTotalLetras++;}
-           else{                                                                //TerminÃ³ la cadena y ahora la va a comparar;
-            for(int i=0;i<iTotalLetras;i++){
-                                //Si las letras coinciden, iCoincide sigue siendo 0. Si no, serÃ¡ 1 y fin;
-                if( (msg_r[i] == msg_PorRecibir[NumMsg][i])&&(!iCoincideFLAG) ){ }else{ iCoincideFLAG=1; }
-            }                                          //TerminÃ³ de comparar la cadena recibida con la que deberÃ­a haber recibido;
-                            //Si coincidieron, la envÃ­a y continua, pero si no, no;
-            if(!iCoincideFLAG){ scia_msg(msg_r); NumMsg++; NumMsg*=!(NumMsg/1); }else{}  //Hace el enviÃ³ y acutaliza el contador;
-
-           }
-   }//*/
-
-///
->>>>>>> 115aca1 (delays)

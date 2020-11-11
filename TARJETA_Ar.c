@@ -95,6 +95,7 @@
 //
 // Globals
 //
+Uint16 LoopCount;
 
 //
 // Function Prototypes
@@ -104,7 +105,7 @@ void scic_echoback_init(void);
 void scic_fifo_init(void);
 void scic_xmit(int a);
 void scic_msg(char *msg);
-void scic_rcv_msg(char *str);
+void scic_msg_r(char *msg_r);
 
 //Parte agregada
 void scia_echoback_init(void);
@@ -116,18 +117,6 @@ void scia_msg(char *msg);
 //
 // Main
 //
-<<<<<<< HEAD
-void main(void)
-{
-    char *msg, *rcvd_msg;
-
-//
-// Step 1. Initialize System Control:
-// PLL, WatchDog, enable Peripheral Clocks
-// This example function is found in the F2837xS_SysCtrl.c file.
-//
-   InitSysCtrl();
-=======
 int iLongitud = 0;
 void main(void)
 {
@@ -139,7 +128,6 @@ void main(void)
     // This example function is found in the F2837xS_SysCtrl.c file.
     //
     InitSysCtrl();
->>>>>>> 115aca1 (delays)
 
     //
     // Step 2. Initialize GPIO:
@@ -148,24 +136,6 @@ void main(void)
     //
     InitGpio();
 
-<<<<<<< HEAD
-//
-// For this example, only init the pins for the SCI-A port.
-//  GPIO_SetupPinMux() - Sets the GPxMUX1/2 and GPyMUX1/2 register bits
-//  GPIO_SetupPinOptions() - Sets the direction and configuration of the GPIOS
-// These functions are found in the F2837xS_Gpio.c file.
-//
-   GPIO_SetupPinMux(90, GPIO_MUX_CPU1, 6);
-   GPIO_SetupPinOptions(90, GPIO_INPUT, GPIO_PUSHPULL);
-   GPIO_SetupPinMux(89, GPIO_MUX_CPU1, 6);
-   GPIO_SetupPinOptions(89, GPIO_OUTPUT, GPIO_ASYNC);
-
-   //Configuracion Scia
-   GPIO_SetupPinMux(85, GPIO_MUX_CPU1, 5);
-   GPIO_SetupPinOptions(85, GPIO_INPUT, GPIO_PUSHPULL);
-   GPIO_SetupPinMux(84, GPIO_MUX_CPU1, 5);
-   GPIO_SetupPinOptions(84, GPIO_OUTPUT, GPIO_ASYNC);
-=======
     //
     // For this example, only init the pins for the SCI-A port.
     //  GPIO_SetupPinMux() - Sets the GPxMUX1/2 and GPyMUX1/2 register bits
@@ -182,7 +152,6 @@ void main(void)
     GPIO_SetupPinOptions(84, GPIO_INPUT, GPIO_PUSHPULL);
     GPIO_SetupPinMux(85, GPIO_MUX_CPU1, 5);
     GPIO_SetupPinOptions(85, GPIO_OUTPUT, GPIO_ASYNC);
->>>>>>> 115aca1 (delays)
 
     //
     // Step 3. Clear all __interrupts and initialize PIE vector table:
@@ -214,16 +183,10 @@ void main(void)
     //
     InitPieVectTable();
 
-<<<<<<< HEAD
-//
-// Step 4. User specific code:
-//
-=======
     //
     // Step 4. User specific code:
     //
     LoopCount = 0;
->>>>>>> 115aca1 (delays)
 
     scic_fifo_init();     // Initialize the SCI_C FIFO
     scic_echoback_init(); // Initialize SCI_C for echoback
@@ -232,43 +195,6 @@ void main(void)
     scia_fifo_init(); // Initialize the SCI FIFO
     scia_echoback_init();
 
-<<<<<<< HEAD
-
-   msg = "Hola 0";
-   scic_msg(msg);
-
-   for(;;)
-   {
-       /*   Prueba con terminal
-       msg = "\n\rEnvia un mensaje con '0' al final";
-       scic_msg(msg);
-
-       scic_rcv_msg(rcvd_msg);
-
-       msg = "\n\rEnviaste: ";
-       scia_msg(msg);
-       scic_msg(msg);
-       scia_msg(rcvd_msg);
-       scic_msg(rcvd_msg);
-       */
-       scic_rcv_msg(rcvd_msg);
-       scic_msg(rcvd_msg);
-   }
-}
-
-// Funci�n para recibir mensajes
-void scic_rcv_msg(char *str)
-{
-    int i = 0;      // Indice para el string
-
-    do
-        while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
-            ;
-    while ((str[i++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
-                                                            // caracter de fin de mensaje ('0') y sumar 1 al �ndice al terminar.
-
-    str[i - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
-=======
     void delay_loop()
     {
         short i;
@@ -309,6 +235,7 @@ B.3 EnvÃ­a Â«finÂ» a scia
 
     int iTotalLetras = 0, iCoincidenFLAG = 1, NumMsg = 0, irepeticion = 0;
 
+    DELAY_US(3000);
     for (irepeticion = 0; irepeticion < 10; irepeticion++)
     {
 
@@ -331,8 +258,7 @@ B.3 EnvÃ­a Â«finÂ» a scia
         * k) Finalmente envía Fin. por SCIA
         */
         //a)
-        DELAY_US(3000);
-        // scic_msg(msg_hola);
+        scic_msg(msg_hola);
         scia_msg(msg_hola);
         //b)
         while (iCoincidenFLAG)
@@ -352,7 +278,7 @@ B.3 EnvÃ­a Â«finÂ» a scia
             }
             //d)
             if (!iCoincidenFLAG)
-            {
+            {   
                 delay_loop();
                 scia_msg(msg_r);
             }
@@ -395,7 +321,27 @@ B.3 EnvÃ­a Â«finÂ» a scia
     //k)
     delay_loop();
     scia_msg(msg_fin); // __  y yaka bamos
->>>>>>> 115aca1 (delays)
+
+    /*
+   scic_msg(msg);
+   for(;;)
+   {
+       while(ScicRegs.SCIFFRX.bit.RXFFST == 0) { } // wait for empty state
+
+       //Logica para guardar la palabra recibida - ivan
+       ReceivedChar = ScicRegs.SCIRXBUF.all;    //Se guarda el caracter contenido en el buffer en ReceivedChar
+       if(ReceivedChar != '0'){                 //Si el caracter es diferente de '0'
+           msg_r[i] = ReceivedChar;             //este mismo se guarda en la posiciÃƒÂ³n i de msg_r
+           i++;                                 //Se utiliza una iteraciÃƒÂ³n para ir llenando los espacio de msg_r
+       }
+       else {                                   //Cuando el valor del caracter es '0', se deja de escribir en la cadena msg_r
+           //Transmit message to SCIA
+           scia_msg(msg_r);                     //se escribe la palabra recibida en la consola de CCS
+           i = 0;                               //Se reinicia el contador para cuando se reciba otra palabra
+       }
+       // - ivan
+       LoopCount++;
+   }//*/
 }
 
 //
@@ -404,7 +350,6 @@ B.3 EnvÃ­a Â«finÂ» a scia
 //
 void scic_echoback_init()
 {
-    //
     // Note: Clocks were turned on to the SCIA peripheral
     // in the InitSysCtrl() function
     //
@@ -429,8 +374,6 @@ void scic_echoback_init()
     ScicRegs.SCICTL1.all = 0x0023; // Relinquish SCI from Reset
 }
 
-<<<<<<< HEAD
-=======
 // Función para recibir mensajes
 void scic_rcv_msg(char *str)
 {
@@ -445,19 +388,14 @@ void scic_rcv_msg(char *str)
     str[iLongitud - 1] = '\0'; // Asignar el caracter nulo al final del string.
 }
 
->>>>>>> 115aca1 (delays)
 //
 // scia_xmit - Transmit a character from the SCI
 //
 void scic_xmit(int a)
 {
-<<<<<<< HEAD
-    while (ScicRegs.SCIFFTX.bit.TXFFST != 0) {}
-=======
     while (ScicRegs.SCIFFTX.bit.TXFFST != 0)
     {
     }
->>>>>>> 115aca1 (delays)
     ScicRegs.SCITXBUF.all = a;
 }
 
@@ -550,8 +488,6 @@ void scia_fifo_init()
 //
 // End of file
 //
-<<<<<<< HEAD
-=======
 
 ///////////////77 INICIA EL CEMENTERIO INICIA EL CEMENTERIO INICIA EL CEMENTERIO  INICA EL CEMENTERIO
 ///
@@ -582,4 +518,3 @@ void scia_fifo_init()
    }//*/
 
 ///
->>>>>>> 115aca1 (delays)
