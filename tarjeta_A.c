@@ -256,7 +256,7 @@ void main(void)
    }
 }
 
-// Funci�n para recibir mensajes
+// Función para recibir mensajes
 void scic_rcv_msg(char *str)
 {
     int i = 0;      // Indice para el string
@@ -265,7 +265,7 @@ void scic_rcv_msg(char *str)
         while(ScicRegs.SCIFFRX.bit.RXFFST == 0)         // Esperar a que el buffer reciba por lo menos un byte.
             ;
     while ((str[i++] = ScicRegs.SCIRXBUF.all) != '0');      // Asignar el valor en el buffer al string, comparar con el
-                                                            // caracter de fin de mensaje ('0') y sumar 1 al �ndice al terminar.
+                                                            // caracter de fin de mensaje ('0') y sumar 1 al índice al terminar.
 
     str[i - 1] = '\0';                                  // Asignar el caracter nulo al final del string.
 =======
@@ -280,58 +280,59 @@ void scic_rcv_msg(char *str)
 
     /*
 
-A.1 Escribe Â«Hola 0Â» al scia y al scic
+A.1 Escribe ÃÂ«Hola 0ÃÂ» al scia y al scic
 
-B.1 Recibe Â«Hola 0Â» y lo manda a scia, responde Â«Â¿cÃ³mo 0Â» a scia y scic
-
-
-A.2 Recibe Â«Â¿cÃ³mo 0Â» y lo manda a scia, responde Â«estÃ¡s? 0Â» a scia y scic
-
-B.2 Recibe Â«estÃ¡s? 0Â» y lo manda a scia, responde Â«Bien 0Â» a scia y scic
+B.1 Recibe ÃÂ«Hola 0ÃÂ» y lo manda a scia, responde ÃÂ«ÃÂ¿cÃÂ³mo 0ÃÂ» a scia y scic
 
 
-A.3 Recibe Â«Bien 0Â» y lo manda a scia.
+A.2 Recibe ÃÂ«ÃÂ¿cÃÂ³mo 0ÃÂ» y lo manda a scia, responde ÃÂ«estÃÂ¡s? 0ÃÂ» a scia y scic
+
+B.2 Recibe ÃÂ«estÃÂ¡s? 0ÃÂ» y lo manda a scia, responde ÃÂ«Bien 0ÃÂ» a scia y scic
+
+
+A.3 Recibe ÃÂ«Bien 0ÃÂ» y lo manda a scia.
 
 0 A.1 B.1 A.2 B.2 A.3
 .
 .
 9
 
-A.4 EnvÃ­a Â«finÂ» a scia
-B.3 EnvÃ­a Â«finÂ» a scia
+A.4 EnvÃÂ­a ÃÂ«finÃÂ» a scia
+B.3 EnvÃÂ­a ÃÂ«finÃÂ» a scia
     */
 
     msg_hola = "Hola 0";
-    msg_como = "¿Cómo 0";
-    msg_estas = "estás? 0";
+    msg_como = "Â¿CÃ³mo 0";
+    msg_estas = "estÃ¡s? 0";
     msg_bien = "Bien. 0";
     msg_fin = "Fin.";
 
     int iTotalLetras = 0, iCoincidenFLAG = 1, NumMsg = 0, irepeticion = 0;
-
+    
+    DELAY_US(3000);
     for (irepeticion = 0; irepeticion < 10; irepeticion++)
     {
 
         /*Lo que hace es:
-        * (1)─Hola
-        *            (2)─¿Cómo
-        * (3)─estás?
-        *            (4)─Bien.
-        *───────────────again x9;
-        * ─Fin       ─Fin.
-        * a) Envía mensaje (1).
-        * b) Espera hasta que le envíen un mensaje igual a (2).
+        * (1)âHola
+        *            (2)âÂ¿CÃ³mo
+        * (3)âestÃ¡s?
+        *            (4)âBien.
+        *âââââââââââââââagain x9;
+        * âFin       âFin.
+        * a) EnvÃ­a mensaje (1).
+        * b) Espera hasta que le envÃ­en un mensaje igual a (2).
         * c)      Compara cada vez al recibido;
-        * d) Cuando recibe exactamente (2) lo envía por SCIA;
-        * e) Ahora envía (3);
+        * d) Cuando recibe exactamente (2) lo envÃ­a por SCIA;
+        * e) Ahora envÃ­a (3);
         * f) Espera hasta recibir un mensaje igual a (4);
-        * g)      Comprobará cadad vez al recibido;
-        * h) Cuando recibe exactamente (4) lo envía por SCIA;
-        ──────────────────Repite otra nueve veces;
-        * k) Finalmente envía Fin. por SCIA
+        * g)      ComprobarÃ¡ cadad vez al recibido;
+        * h) Cuando recibe exactamente (4) lo envÃ­a por SCIA;
+        ââââââââââââââââââRepite otra nueve veces;
+        * k) Finalmente envÃ­a Fin. por SCIA
         */
         //a)
-        DELAY_US(3000);
+        
         // scic_msg(msg_hola);
         scia_msg(msg_hola);
         //b)
@@ -431,7 +432,7 @@ void scic_echoback_init()
 
 <<<<<<< HEAD
 =======
-// Función para recibir mensajes
+// FunciÃ³n para recibir mensajes
 void scic_rcv_msg(char *str)
 {
     iLongitud = 0; // Indice para el string
@@ -440,7 +441,7 @@ void scic_rcv_msg(char *str)
         while (ScicRegs.SCIFFRX.bit.RXFFST == 0) // Esperar a que el buffer reciba por lo menos un byte.
             ;
     while ((str[iLongitud++] = ScicRegs.SCIRXBUF.all) != '0'); // Asignar el valor en el buffer al string, comparar con el
-                                                               // caracter de fin de mensaje ('0') y sumar 1 al índice al terminar.
+                                                               // caracter de fin de mensaje ('0') y sumar 1 al Ã­ndice al terminar.
 
     str[iLongitud - 1] = '\0'; // Asignar el caracter nulo al final del string.
 }
@@ -570,13 +571,13 @@ void scia_fifo_init()
            while(ScicRegs.SCIFFRX.bit.RXFFST == 0);
            ReceivedChar = ScicRegs.SCIRXBUF.all;
            if(ReceivedChar != '0'){ msg_r[iTotalLetras] = ReceivedChar; iTotalLetras++;}
-           else{                                                                //TerminÃ³ la cadena y ahora la va a comparar;
+           else{                                                                //TerminÃÂ³ la cadena y ahora la va a comparar;
             for(int i=0;i<iTotalLetras;i++){
-                                //Si las letras coinciden, iCoincide sigue siendo 0. Si no, serÃ¡ 1 y fin;
+                                //Si las letras coinciden, iCoincide sigue siendo 0. Si no, serÃÂ¡ 1 y fin;
                 if( (msg_r[i] == msg_PorRecibir[NumMsg][i])&&(!iCoincideFLAG) ){ }else{ iCoincideFLAG=1; }
-            }                                          //TerminÃ³ de comparar la cadena recibida con la que deberÃ­a haber recibido;
-                            //Si coincidieron, la envÃ­a y continua, pero si no, no;
-            if(!iCoincideFLAG){ scia_msg(msg_r); NumMsg++; NumMsg*=!(NumMsg/1); }else{}  //Hace el enviÃ³ y acutaliza el contador;
+            }                                          //TerminÃÂ³ de comparar la cadena recibida con la que deberÃÂ­a haber recibido;
+                            //Si coincidieron, la envÃÂ­a y continua, pero si no, no;
+            if(!iCoincideFLAG){ scia_msg(msg_r); NumMsg++; NumMsg*=!(NumMsg/1); }else{}  //Hace el enviÃÂ³ y acutaliza el contador;
 
            }
    }//*/
