@@ -219,13 +219,6 @@ void main(void)
           i = 0;
           it++;
       }
-      /*
-     else     // El array de strings fue transmitido/recibido por completo.
-     {
-         i = 0;       // Reiniciar índice del array de strings
-         it++;        // Sumar uno a la iteración.
-     }
-     */
    }
 }
 
