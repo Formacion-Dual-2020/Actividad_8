@@ -118,7 +118,7 @@ void scic_msg(char *msg);
 //
 void main(void)
 {
-    char rcvd_msg[10] = "";     // string para recivir mensajes
+    char rcvd_msg[10] = "";     // string para recibir mensajes
     char msg[STR_ARR_SIZE][10] = {"Hola ", "como ", "estas? ", "bien."};    // Array con strings
     int i = 0, it = 0;          // i se usa para avanzar en el array msg, it para contar las iteraciones.
 
@@ -212,7 +212,6 @@ void main(void)
          DELAY_US(2000000);
          scia_msg(msg[++i]);            // Enviar siguiente string
          scic_msg(msg[i++]);          //
-
      }
       if (i >= STR_ARR_SIZE)
       {
