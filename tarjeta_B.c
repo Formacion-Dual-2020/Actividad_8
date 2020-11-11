@@ -214,7 +214,7 @@ void main(void)
          scic_msg(msg[i++]);          //
 
      }
-      if (i >= 4)
+      if (i >= STR_ARR_SIZE)
       {
           i = 0;
           it++;
