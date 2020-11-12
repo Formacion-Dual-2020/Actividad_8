@@ -227,6 +227,7 @@ void main(void)
            }
        }
    }
+   scia_msg("fin");
 }
 
 // Función para recibir mensajes
